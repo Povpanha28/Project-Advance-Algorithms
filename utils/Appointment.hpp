@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <iomanip>
 
 using namespace std;
 
@@ -91,6 +92,49 @@ public:
         if (!found) {
             cout << "No appointments found for patient ID " << patientId << endl;
         }
+    }
+
+    void generateAppointmentReport() {
+        if (appointments.empty()) {
+            cout << "No appointments available.\n";
+            return;
+        }
+
+        // Variables to hold the maximum width of each column
+        size_t maxIdWidth = 10;  // Minimum width for Patient ID
+        size_t maxTimeWidth = 20;  // Minimum width for Appointment Time
+        size_t maxDescWidth = 12;  // Minimum width for Description
+
+        // Calculate the maximum width of each column
+        for (const auto& appointment : appointments) {
+            maxIdWidth = std::max(maxIdWidth, std::to_string(appointment.patientId).length());
+            maxTimeWidth = std::max(maxTimeWidth, appointment.appointmentTime.length());
+            maxDescWidth = std::max(maxDescWidth, appointment.description.length());
+        }
+
+        // Generate the header and separator line
+        cout << "Appointment Report\n";
+        size_t lineLength = maxIdWidth + maxTimeWidth + maxDescWidth + 12;
+        for (size_t i = 0; i < lineLength; ++i) cout << "-";
+        cout << "\n";
+
+        // Print the column headers with dynamic widths
+        cout << left << setw(maxIdWidth + 2) << "Patient ID"
+             << setw(maxTimeWidth + 2) << "Appointment Time"
+             << setw(maxDescWidth + 2) << "Description" << endl;
+
+        for (size_t i = 0; i < lineLength; ++i) cout << "-";
+        cout << "\n";
+
+        // Print the appointment data with dynamic widths
+        for (const auto& appointment : appointments) {
+            cout << left << setw(maxIdWidth + 2) << appointment.patientId
+                 << setw(maxTimeWidth + 2) << appointment.appointmentTime
+                 << setw(maxDescWidth + 2) << (appointment.description.empty() ? "N/A" : appointment.description) << endl;
+        }
+
+        for (size_t i = 0; i < lineLength; ++i) cout << "-";
+        cout << "\n";
     }
 };
 
