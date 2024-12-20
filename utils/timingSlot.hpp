@@ -6,7 +6,7 @@ using namespace std;
 class timingSlot
 {
     private:
-        /* data */
+
     public:
     int startHour;
     int endHour;
