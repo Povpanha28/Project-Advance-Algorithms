@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "Patient_Manage.hpp"  // Include the PatientManagement class for access to patient data
 #include "Validation.hpp"
 
 using namespace std;
@@ -23,8 +24,12 @@ public:
 class AppointmentManagement {
 private:
     vector<Appointment> appointments; // Vector to store all appointments
+    PatientManagement& patientManager; // Reference to PatientManagement class
 
 public:
+    // Constructor accepts a reference to PatientManagement
+    AppointmentManagement(PatientManagement& patientManager) : patientManager(patientManager) {}
+
     // Function to book an appointment
     void bookAppointment() {
         int patientId, year, month, day, hour, minute;
@@ -32,6 +37,13 @@ public:
 
         cout << "Enter Patient ID: ";
         cin >> patientId;
+
+        // Check if the patient exists in the system
+        if (patientManager.searchPatient(patientId) == nullptr) {
+            cout << "Patient ID not found. Appointment not booked.\n";
+            return;
+        }
+
         cout << "Enter appointment date (YYYY MM DD): ";
         cin >> year >> month >> day;
         cout << "Enter appointment time (HH MM): ";
@@ -64,7 +76,7 @@ public:
         cout << "Appointment successfully booked for Patient ID " << patientId << " on " << formattedDate << " at " << formattedTime << ".\n";
     }
 
-    // Function to view all appointments
+    // Function to view all appointments with patient details
     void viewAppointments() {
         if (appointments.empty()) {
             cout << "No appointments scheduled.\n";
@@ -73,7 +85,10 @@ public:
 
         cout << "Scheduled Appointments:\n";
         for (const auto &appointment : appointments) {
+            // Fetch patient details by patient ID
+            Patient* patient = patientManager.searchPatient(appointment.patientId);
             cout << "Patient ID: " << appointment.patientId
+                 << ", Name: " << (patient ? patient->name : "Unknown")
                  << ", Date: " << appointment.appointmentDate
                  << ", Time: " << appointment.appointmentTime
                  << ", Description: " << (appointment.description.empty() ? "N/A" : appointment.description) << "\n";
