@@ -130,9 +130,19 @@ void patient_management()
                 }
                 break;
         }
-        case '4':{ 
+        case '4':{
+            int id;
+            char choice;
             cout<<"\tDelete Patient"<<endl;
-              
+            cout<<"Enter ID: ";
+            cin>>id;
+            pm.displayPatientById(id);
+            cout<<endl<<"Are You Sure To Delete This Patient? y/n :";
+            cin>>choice;
+            if(choice=='y'||choice=='Y'){
+                pm.deletePatient(id);
+                cout<<"Successfully Delete"<<endl;
+            }
             break;
         }
         case '5':
