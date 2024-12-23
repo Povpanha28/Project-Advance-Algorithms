@@ -70,7 +70,7 @@ public:
             temp->next = newNode;
         }
         patientCount++;
-        cout << "Patient added successfully.\n";
+        
     }
 
     Patient *searchPatient(int id)
@@ -179,7 +179,7 @@ public:
     void saveToFile(const string &filename)
     {
         ofstream file(filename, ios::binary);
-        if (!file)
+        if (!file.is_open())
         {
             cout << "Error opening file for writing.\n";
             return;
