@@ -42,6 +42,7 @@ int main() {
     std::cout << "Displaying all patients after deletion:\n";
     patientManager.displayPatients();
     std::cout << "\n";
+    
 
     return 0;
 }
