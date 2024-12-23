@@ -2,6 +2,7 @@
 #define PATIENT_MANAGEMENT_HPP
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include "Node.hpp" // Assuming Node.hpp contains the Patient and PatientNode definitions
 
@@ -15,7 +16,7 @@ public:
     string contact;
     string medicalHistory;
 
-    Patient(int id, string name, int age, string contact, string medicalHistory) 
+    Patient(int id = 0, string name = "", int age = 0, string contact = "", string medicalHistory = "") 
         : id(id), name(name), age(age), contact(contact), medicalHistory(medicalHistory) {}
 };
 
@@ -35,6 +36,15 @@ private:
 public:
     // Constructor
     PatientManagement() : head(nullptr), patientCount(0) {}
+
+    // Destructor to clean up memory
+    ~PatientManagement() {
+        while (head != nullptr) {
+            PatientNode* temp = head;
+            head = head->next;
+            delete temp;
+        }
+    }
 
     void addPatient(int id, string name, int age, string contact, string medicalHistory) {
         Patient newPatient(id, name, age, contact, medicalHistory);
@@ -133,6 +143,78 @@ public:
 
     PatientNode* getHead() {
         return head; // To be used by PatientReport
+    }
+
+    // Save patients to a file
+    void saveToFile(const string& filename) {
+        ofstream file(filename);
+        if (!file) {
+            cout << "Error opening file for writing.\n";
+            return;
+        }
+
+        PatientNode* temp = head;
+        while (temp != nullptr) {
+            file << temp->data.id << ","
+                 << temp->data.name << ","
+                 << temp->data.age << ","
+                 << temp->data.contact << ","
+                 << temp->data.medicalHistory << endl;
+            temp = temp->next;
+        }
+
+        file.close();
+        cout << "Patients saved to file successfully.\n";
+    }
+
+    // Load patients from a file
+    void loadFromFile(const string& filename) {
+        ifstream file(filename);
+        if (!file) {
+            cout << "Error opening file for reading.\n";
+            return;
+        }
+
+        // Clear existing patients
+        while (head != nullptr) {
+            PatientNode* temp = head;
+            head = head->next;
+            delete temp;
+        }
+        patientCount = 0;
+
+        string line;
+        while (getline(file, line)) {
+            size_t pos = 0;
+            string token;
+            int id, age;
+            string name, contact, medicalHistory;
+
+            // Extract data fields
+            pos = line.find(",");
+            id = stoi(line.substr(0, pos));
+            line.erase(0, pos + 1);
+
+            pos = line.find(",");
+            name = line.substr(0, pos);
+            line.erase(0, pos + 1);
+
+            pos = line.find(",");
+            age = stoi(line.substr(0, pos));
+            line.erase(0, pos + 1);
+
+            pos = line.find(",");
+            contact = line.substr(0, pos);
+            line.erase(0, pos + 1);
+
+            medicalHistory = line;
+
+            // Add patient to the list
+            addPatient(id, name, age, contact, medicalHistory);
+        }
+
+        file.close();
+        cout << "Patients loaded from file successfully.\n";
     }
 };
 
