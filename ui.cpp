@@ -21,15 +21,16 @@ void header()
 }
 void patient_management()
 {
-    while (true)
-    {
-
+    
+        home:
+        system("cls");
         cout << "\t Patient Managent" << endl;
         cout << "1. New Patient" << endl;
         cout << "2. Display Patient" << endl;
         cout << "3. Update Patient Info" << endl;
         cout << "4. Delete" << endl;
-        cout << "5. Back" << endl;
+        cout << "ESC to Back" << endl;
+        while (true){
         char option = getch();
         switch (option)
         {
@@ -50,13 +51,16 @@ void patient_management()
             getline(cin, tel);
             cout << "Medical Record: ";
             getline(cin, Mrecord);
+            system("cls");
             pm.addPatient(id, name, age, tel, Mrecord);
+            cout<<endl<<"Press ENTER to go back";
             break;
         }
         case '2':{
             system("cls");
             cout << "Display Patient" << endl;
             pm.displayPatients();
+            cout<<endl<<"Press ENTER to go back";
             break;
         }
         case '3':{
@@ -78,16 +82,18 @@ void patient_management()
             }
             cout<<endl<<"Which do you want to Update?"<<endl;
             cout << "1. Update ID" << endl
-                 << "2.Update Name" << endl
+                 << "2. Update Name" << endl
                  << "3. Update Age" << endl
                  << "4. Update Contact" << endl
                  << "5. Update Medical Record" << endl
-                 << "Esc to Back";
+                 << "Esc to Back"<<endl;
 
             char choice = getch();
             switch (choice){
                 case '1':{
-                     int newId;
+                    system("cls");
+                    pm.displayPatientById(ID);
+                    int newId;
                     cout << "Enter new ID: ";
                     cin >> newId;
                     patient->id = newId;
@@ -96,6 +102,8 @@ void patient_management()
                     break;
                 }
                 case '2':{
+                    system("cls");
+                    pm.displayPatientById(ID);
                     string newName;
                     cout << "Enter new Name: ";
                     cin.ignore(); // Clear the input buffer
@@ -105,6 +113,8 @@ void patient_management()
                     break;
                 }
                 case '3':{
+                    system("cls");
+                    pm.displayPatientById(ID);
                     int newAge;
                     cout << "Enter new Age: ";
                     cin >> newAge;
@@ -113,6 +123,8 @@ void patient_management()
                     break;
                 }
                 case '4':{
+                    system("cls");
+                    pm.displayPatientById(ID);
                     string newContact;
                     cout << "Enter new Contact: ";
                     cin.ignore(); // Clear the input buffer
@@ -122,6 +134,8 @@ void patient_management()
                     break;
                 }
                 case '5':{
+                    system("cls");
+                    pm.displayPatientById(ID);
                     string newMedicalHistory;
                     cout << "Enter new Medical History: ";
                     cin.ignore(); // Clear the input buffer
@@ -133,7 +147,8 @@ void patient_management()
                     return;
                 }
                 }
-                break;
+            cout<<endl<<"Press ENTER to go back";
+            break;
         }
         case '4':{
             int id;
@@ -148,9 +163,14 @@ void patient_management()
                 pm.deletePatient(id);
                 cout<<"Successfully Delete"<<endl;
             }
+            cout<<endl<<"Press ENTER to go back";
             break;
         }
-        case '5':
+        case 13:{
+            goto home;
+            break;
+        }
+        case 27:
             return;
             break;
         }
@@ -158,40 +178,50 @@ void patient_management()
 }
 void app_management()
 {
+    home:
+    system("cls");
     cout << "\tAppointment Management" << endl;
     cout << "1. Make Appointment" << endl;
     cout << "2. Update Appointment"<<endl;
     cout << "3. View Appointment" << endl;
     cout << "4. Delete Appointment"<<endl;
     cout << "ESC to Back" << endl;
-    while(true){
+   while(true){
     char option=getch();
         switch (option){
             case '1':{
                 system("cls");
                 cout<<"\tMake Appointment"<<endl;
                 app_m.bookAppointment();
+                cout<<endl<<"Press ENTER to go back";
                 break;
             }
             case '2':{
                 system("cls");
                 cout<<"\t Update Appiontment"<<endl;
                 app_m.editAppointment();
+                cout<<endl<<"Press ENTER to go back";
                 break;
             }
             case '3':{
                 system("cls");
                 cout<<"\tView Appointment"<<endl;
                 app_m.viewAppointments();
+                cout<<endl<<"Press ENTER to go back";
                 break;
             }
             case '4':{
                 system("cls");
                 app_m.deleteAppointment();
+                cout<<endl<<"Press ENTER to go back";
                 break;
             }
             case 27:{
                 return;
+                break;
+            }
+            case 13:{
+                goto home;
                 break;
             }
             default:{
