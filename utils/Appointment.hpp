@@ -112,5 +112,135 @@ public:
 
         cout << "Enter Patient ID: ";
         cin >> patientId;
+
+        for (auto &appointment : appointments)
+        {
+            if (appointment.patientId == patientId)
+            {
+                // Collect new details for the appointment
+                cout << "Enter new appointment date (YYYY MM DD): ";
+                cin >> newYear >> newMonth >> newDay;
+                cout << "Enter new appointment time (HH MM): ";
+                cin >> newHour >> newMinute;
+                cin.ignore(); // Clear the input buffer
+                cout << "Enter new description (optional): ";
+                getline(cin, newDescription);
+
+                // Validate and format the new date
+                if (!validateDate(newYear, newMonth, newDay))
+                {
+                    cout << "Invalid date. Edit failed.\n";
+                    return;
+                }
+                string newFormattedDate = to_string(newYear) + "-" +
+                                          (newMonth < 10 ? "0" : "") + to_string(newMonth) + "-" +
+                                          (newDay < 10 ? "0" : "") + to_string(newDay);
+
+                // Validate and format the new time
+                if (!validateTime(newHour, newMinute))
+                {
+                    cout << "Invalid time. Edit failed.\n";
+                    return;
+                }
+                string newFormattedTime = (newHour < 10 ? "0" : "") + to_string(newHour) + ":" +
+                                          (newMinute < 10 ? "0" : "") + to_string(newMinute);
+
+                // Update appointment details
+                appointment.appointmentDate = newFormattedDate;
+                appointment.appointmentTime = newFormattedTime;
+                appointment.description = newDescription;
+
+                cout << "Appointment updated successfully for Patient ID " << patientId << ".\n";
+                return;
+            }
+        }
+        cout << "Appointment not found for Patient ID " << patientId << ".\n";
+    }
+
+    // Function to delete an appointment by Patient ID
+    void deleteAppointment()
+    {
+        int patientId;
+
+        cout << "Enter Patient ID: ";
+        cin >> patientId;
+
+        for (auto it = appointments.begin(); it != appointments.end(); ++it)
+        {
+            if (it->patientId == patientId)
+            {
+                appointments.erase(it);
+                cout << "Appointment deleted successfully for Patient ID " << patientId << ".\n";
+                return;
+            }
+        }
+        cout << "Appointment not found for Patient ID " << patientId << ".\n";
+    }
+
+    // Save appointments to a file
+    void saveToFile(const string &filename)
+    {
+        ofstream file(filename);
+        if (!file)
+        {
+            cout << "Error opening file for writing: " << filename << "\n";
+            return;
+        }
+
+        for (const auto &appointment : appointments)
+        {
+            file << appointment.patientId << ","
+                 << appointment.appointmentDate << ","
+                 << appointment.appointmentTime << ","
+                 << appointment.description << "\n";
+        }
+
+        file.close();
+        cout << "Appointments saved to " << filename << " successfully.\n";
+    }
+
+    // Load appointments from a file
+    void loadFromFile(const string &filename)
+    {
+        ifstream file(filename);
+        if (!file)
+        {
+            cout << "Error opening file for reading: " << filename << "\n";
+            return;
+        }
+
+        appointments.clear(); // Clear existing appointments
+
+        string line;
+        while (getline(file, line))
+        {
+            size_t pos = 0;
+            string token;
+            int patientId;
+            string appointmentDate, appointmentTime, description;
+
+            // Extract data fields
+            pos = line.find(",");
+            patientId = stoi(line.substr(0, pos));
+            line.erase(0, pos + 1);
+
+            pos = line.find(",");
+            appointmentDate = line.substr(0, pos);
+            line.erase(0, pos + 1);
+
+            pos = line.find(",");
+            appointmentTime = line.substr(0, pos);
+            line.erase(0, pos + 1);
+
+            description = line;
+
+            // Add appointment to the vector
+            appointments.emplace_back(patientId, appointmentDate, appointmentTime, description);
+        }
+
+        file.close();
+        cout << "Appointments loaded from " << filename << " successfully.\n";
     }
 };
+
+#endif // APPOINTMENTMANAGEMENT_HPP
