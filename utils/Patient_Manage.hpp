@@ -4,11 +4,12 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "Node.hpp" // Assuming Node.hpp contains the Patient and PatientNode definitions
+#include "Node.hpp"
 
 using namespace std;
 
-class Patient {
+class Patient
+{
 public:
     int id;
     string name;
@@ -16,21 +17,23 @@ public:
     string contact;
     string medicalHistory;
 
-    Patient(int id = 0, string name = "", int age = 0, string contact = "", string medicalHistory = "") 
+    Patient(int id = 0, string name = "", int age = 0, string contact = "", string medicalHistory = "")
         : id(id), name(name), age(age), contact(contact), medicalHistory(medicalHistory) {}
 };
 
-class PatientNode {
+class PatientNode
+{
 public:
     Patient data;
-    PatientNode* next;
+    PatientNode *next;
 
     PatientNode(Patient patient) : data(patient), next(nullptr) {}
 };
 
-class PatientManagement {
+class PatientManagement
+{
 private:
-    PatientNode* head;
+    PatientNode *head;
     int patientCount;
 
 public:
@@ -38,23 +41,30 @@ public:
     PatientManagement() : head(nullptr), patientCount(0) {}
 
     // Destructor to clean up memory
-    ~PatientManagement() {
-        while (head != nullptr) {
-            PatientNode* temp = head;
+    ~PatientManagement()
+    {
+        while (head != nullptr)
+        {
+            PatientNode *temp = head;
             head = head->next;
             delete temp;
         }
     }
 
-    void addPatient(int id, string name, int age, string contact, string medicalHistory) {
+    void addPatient(int id, string name, int age, string contact, string medicalHistory)
+    {
         Patient newPatient(id, name, age, contact, medicalHistory);
-        PatientNode* newNode = new PatientNode(newPatient);
+        PatientNode *newNode = new PatientNode(newPatient);
 
-        if (head == nullptr) {
+        if (head == nullptr)
+        {
             head = newNode;
-        } else {
-            PatientNode* temp = head;
-            while (temp->next != nullptr) {
+        }
+        else
+        {
+            PatientNode *temp = head;
+            while (temp->next != nullptr)
+            {
                 temp = temp->next;
             }
             temp->next = newNode;
@@ -63,10 +73,13 @@ public:
         cout << "Patient added successfully.\n";
     }
 
-    Patient* searchPatient(int id) {
-        PatientNode* temp = head;
-        while (temp != nullptr) {
-            if (temp->data.id == id) {
+    Patient *searchPatient(int id)
+    {
+        PatientNode *temp = head;
+        while (temp != nullptr)
+        {
+            if (temp->data.id == id)
+            {
                 return &temp->data;
             }
             temp = temp->next;
@@ -74,27 +87,34 @@ public:
         return nullptr; // Patient not found
     }
 
-    void editPatientDetails(int id, string name, int age, string contact, string medicalHistory) {
-        Patient* patient = searchPatient(id);
-        if (patient != nullptr) {
+    void editPatientDetails(int id, string name, int age, string contact, string medicalHistory)
+    {
+        Patient *patient = searchPatient(id);
+        if (patient != nullptr)
+        {
             patient->name = name;
             patient->age = age;
             patient->contact = contact;
             patient->medicalHistory = medicalHistory;
             cout << "Patient details updated successfully.\n";
-        } else {
+        }
+        else
+        {
             cout << "Patient not found.\n";
         }
     }
 
-    void deletePatient(int id) {
-        if (head == nullptr) {
+    void deletePatient(int id)
+    {
+        if (head == nullptr)
+        {
             cout << "No patients to delete.\n";
             return;
         }
 
-        if (head->data.id == id) {
-            PatientNode* temp = head;
+        if (head->data.id == id)
+        {
+            PatientNode *temp = head;
             head = head->next;
             delete temp;
             patientCount--;
@@ -102,17 +122,21 @@ public:
             return;
         }
 
-        PatientNode* current = head;
-        PatientNode* prev = nullptr;
+        PatientNode *current = head;
+        PatientNode *prev = nullptr;
 
-        while (current != nullptr && current->data.id != id) {
+        while (current != nullptr && current->data.id != id)
+        {
             prev = current;
             current = current->next;
         }
 
-        if (current == nullptr) {
+        if (current == nullptr)
+        {
             cout << "Patient not found.\n";
-        } else {
+        }
+        else
+        {
             prev->next = current->next;
             delete current;
             patientCount--;
@@ -120,14 +144,17 @@ public:
         }
     }
 
-    void displayPatients() {
-        if (head == nullptr) {
+    void displayPatients()
+    {
+        if (head == nullptr)
+        {
             cout << "No patients available.\n";
             return;
         }
 
-        PatientNode* temp = head;
-        while (temp != nullptr) {
+        PatientNode *temp = head;
+        while (temp != nullptr)
+        {
             cout << "ID: " << temp->data.id
                  << ", Name: " << temp->data.name
                  << ", Age: " << temp->data.age
@@ -137,29 +164,46 @@ public:
         }
     }
 
-    int getPatientCount() {
+    int getPatientCount()
+    {
         return patientCount;
     }
 
-    PatientNode* getHead() {
+    PatientNode *getHead()
+    {
         return head; // To be used by PatientReport
     }
 
     // Save patients to a file
-    void saveToFile(const string& filename) {
-        ofstream file(filename);
-        if (!file) {
+    // Save patients to a binary file
+    void saveToFile(const string &filename)
+    {
+        ofstream file(filename, ios::binary);
+        if (!file)
+        {
             cout << "Error opening file for writing.\n";
             return;
         }
 
-        PatientNode* temp = head;
-        while (temp != nullptr) {
-            file << temp->data.id << ","
-                 << temp->data.name << ","
-                 << temp->data.age << ","
-                 << temp->data.contact << ","
-                 << temp->data.medicalHistory << endl;
+        PatientNode *temp = head;
+        while (temp != nullptr)
+        {
+            file.write(reinterpret_cast<const char *>(&temp->data.id), sizeof(temp->data.id));
+            file.write(reinterpret_cast<const char *>(&temp->data.age), sizeof(temp->data.age));
+
+            size_t nameSize = temp->data.name.size();
+            size_t contactSize = temp->data.contact.size();
+            size_t medicalHistorySize = temp->data.medicalHistory.size();
+
+            file.write(reinterpret_cast<const char *>(&nameSize), sizeof(nameSize));
+            file.write(temp->data.name.c_str(), nameSize);
+
+            file.write(reinterpret_cast<const char *>(&contactSize), sizeof(contactSize));
+            file.write(temp->data.contact.c_str(), contactSize);
+
+            file.write(reinterpret_cast<const char *>(&medicalHistorySize), sizeof(medicalHistorySize));
+            file.write(temp->data.medicalHistory.c_str(), medicalHistorySize);
+
             temp = temp->next;
         }
 
@@ -167,58 +211,68 @@ public:
         cout << "Patients saved to file successfully.\n";
     }
 
-    // Load patients from a file
-    void loadFromFile(const string& filename) {
-        ifstream file(filename);
-        if (!file) {
+    // Load patients from a binary file
+    void loadFromFile(const string &filename)
+    {
+        ifstream file(filename, ios::binary);
+        if (!file)
+        {
             cout << "Error opening file for reading.\n";
             return;
         }
 
         // Clear existing patients
-        while (head != nullptr) {
-            PatientNode* temp = head;
+        while (head != nullptr)
+        {
+            PatientNode *temp = head;
             head = head->next;
             delete temp;
         }
         patientCount = 0;
 
-        string line;
-        while (getline(file, line)) {
-            size_t pos = 0;
-            string token;
-            int id, age;
-            string name, contact, medicalHistory;
+        while (!file.eof())
+        {
+            Patient tempPatient;
 
-            // Extract data fields
-            pos = line.find(",");
-            id = stoi(line.substr(0, pos));
-            line.erase(0, pos + 1);
+            if (!file.read(reinterpret_cast<char *>(&tempPatient.id), sizeof(tempPatient.id)))
+                break;
+            file.read(reinterpret_cast<char *>(&tempPatient.age), sizeof(tempPatient.age));
 
-            pos = line.find(",");
-            name = line.substr(0, pos);
-            line.erase(0, pos + 1);
+            size_t nameSize, contactSize, medicalHistorySize;
 
-            pos = line.find(",");
-            age = stoi(line.substr(0, pos));
-            line.erase(0, pos + 1);
+            file.read(reinterpret_cast<char *>(&nameSize), sizeof(nameSize));
+            char *nameBuffer = new char[nameSize + 1];
+            file.read(nameBuffer, nameSize);
+            nameBuffer[nameSize] = '\0';
+            tempPatient.name = nameBuffer;
+            delete[] nameBuffer;
 
-            pos = line.find(",");
-            contact = line.substr(0, pos);
-            line.erase(0, pos + 1);
+            file.read(reinterpret_cast<char *>(&contactSize), sizeof(contactSize));
+            char *contactBuffer = new char[contactSize + 1];
+            file.read(contactBuffer, contactSize);
+            contactBuffer[contactSize] = '\0';
+            tempPatient.contact = contactBuffer;
+            delete[] contactBuffer;
 
-            medicalHistory = line;
+            file.read(reinterpret_cast<char *>(&medicalHistorySize), sizeof(medicalHistorySize));
+            char *medicalHistoryBuffer = new char[medicalHistorySize + 1];
+            file.read(medicalHistoryBuffer, medicalHistorySize);
+            medicalHistoryBuffer[medicalHistorySize] = '\0';
+            tempPatient.medicalHistory = medicalHistoryBuffer;
+            delete[] medicalHistoryBuffer;
 
-            // Add patient to the list
-            addPatient(id, name, age, contact, medicalHistory);
+            addPatient(tempPatient.id, tempPatient.name, tempPatient.age, tempPatient.contact, tempPatient.medicalHistory);
         }
 
         file.close();
         cout << "Patients loaded from file successfully.\n";
     }
-    void displayPatientById(int id) {
-        Patient* patient = searchPatient(id);
-        if (patient != nullptr) {
+
+    void displayPatientById(int id)
+    {
+        Patient *patient = searchPatient(id);
+        if (patient != nullptr)
+        {
             cout << "Patient Details:\n";
             cout << "---------------------------------\n";
             cout << "ID: " << patient->id << "\n";
@@ -227,7 +281,9 @@ public:
             cout << "Contact: " << patient->contact << "\n";
             cout << "Medical History: " << patient->medicalHistory << "\n";
             cout << "---------------------------------\n";
-        } else {
+        }
+        else
+        {
             cout << "Patient with ID " << id << " not found.\n";
         }
     }
