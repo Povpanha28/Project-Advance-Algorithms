@@ -3,13 +3,23 @@
 #include <conio.h>
 #include "utils/Appointment.hpp"
 #include "utils/Patient_Manage.hpp"
+#include "utils/Generate.hpp"
 
+string PM_file="file/PatientInfo.dat";
+string APM_file="file/appointment.dat";
 
 PatientManagement pm;
 AppointmentManagement app_m(pm);
 
 using namespace std;
-
+void initial(){
+    pm.loadFromFile("PM_file");
+    app_m.loadFromFile("APM_file");
+}
+void closing(){
+    pm.saveToFile("PM_file");
+    app_m.saveToFile("APM_file");
+}
 void header()
 {
     cout << "\tClinic Management" << endl;
@@ -154,6 +164,7 @@ void patient_management()
         case '4':{
             int id;
             char choice;
+            system("cls");
             cout<<"\tDelete Patient"<<endl;
             cout<<"Enter ID: ";
             cin>>id;
@@ -162,7 +173,6 @@ void patient_management()
             cin>>choice;
             if(choice=='y'||choice=='Y'){
                 pm.deletePatient(id);
-                cout<<"Successfully Delete"<<endl;
             }
             cout<<endl<<"Press ENTER to go back";
             break;
@@ -241,10 +251,28 @@ void clinic_time()
     cout << "3.Back" << endl;
 }
 void generateReport(){
+    system("cls");
+    cout << "\nGenerating Patient Report";
+    for(int i=0;i<3;i++){
+        cout<<".";
+        Sleep(500);}
+    system("cls");
+    cout<<"\t";
+    PatientReport::displayPatientReport(pm,app_m);
+    cout<<endl<<"Press ENTER to go back";
+    while(true){
+        char option=getch();
+        if(option==13){
+            return;
+        }
+    }
+    
     
 }
-int main()
-{
+int main(){
+    system("cls");
+    initial();
+    Sleep(2000);
     while (true)
     {
         system("cls");
@@ -265,6 +293,9 @@ int main()
             generateReport();
             break;
         case 27:
+            closing();
+            system("cls");
+            cout<<"Program Ended";
             return 0;
         default:{
             system("cls");
