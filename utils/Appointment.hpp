@@ -15,12 +15,22 @@ class Appointment
 {
 public:
     int patientId;          // Patient's ID
-    string appointmentDate; // Appointment Date (e.g., "2024-12-21")
-    string appointmentTime; // Appointment Time (e.g., "10:00")
-    string description;     // Reason for the appointment (optional)
+    char appointmentDate[11]; // Appointment Date (e.g., "2024-12-21")
+    char appointmentTime[6];  // Appointment Time (e.g., "10:00")
+    char description[256];    // Reason for the appointment (optional)
 
     Appointment(int patientId = 0, string appointmentDate = "", string appointmentTime = "", string description = "")
-        : patientId(patientId), appointmentDate(appointmentDate), appointmentTime(appointmentTime), description(description) {}
+        : patientId(patientId)
+    {
+        strncpy(this->appointmentDate, appointmentDate.c_str(), sizeof(this->appointmentDate) - 1);
+        this->appointmentDate[sizeof(this->appointmentDate) - 1] = '\0';
+
+        strncpy(this->appointmentTime, appointmentTime.c_str(), sizeof(this->appointmentTime) - 1);
+        this->appointmentTime[sizeof(this->appointmentTime) - 1] = '\0';
+
+        strncpy(this->description, description.c_str(), sizeof(this->description) - 1);
+        this->description[sizeof(this->description) - 1] = '\0';
+    }
 };
 
 class AppointmentManagement
@@ -102,141 +112,43 @@ public:
                  << ", Name: " << (patient ? patient->name : "Unknown")
                  << ", Date: " << appointment.appointmentDate
                  << ", Time: " << appointment.appointmentTime
-                 << ", Description: " << (appointment.description.empty() ? "N/A" : appointment.description) << "\n";
+                 << ", Description: " << (strlen(appointment.description) == 0 ? "N/A" : appointment.description) << "\n";
         }
     }
-    void editAppointment()
-    {
-        int patientId, newYear, newMonth, newDay, newHour, newMinute;
-        string newDescription;
 
-        cout << "Enter Patient ID: ";
-        cin >> patientId;
-
-        for (auto &appointment : appointments)
-        {
-            if (appointment.patientId == patientId)
-            {
-                // Collect new details for the appointment
-                cout << "Enter new appointment date (YYYY MM DD): ";
-                cin >> newYear >> newMonth >> newDay;
-                cout << "Enter new appointment time (HH MM): ";
-                cin >> newHour >> newMinute;
-                cin.ignore(); // Clear the input buffer
-                cout << "Enter new description (optional): ";
-                getline(cin, newDescription);
-
-                // Validate and format the new date
-                if (!validateDate(newYear, newMonth, newDay))
-                {
-                    cout << "Invalid date. Edit failed.\n";
-                    return;
-                }
-                string newFormattedDate = to_string(newYear) + "-" +
-                                          (newMonth < 10 ? "0" : "") + to_string(newMonth) + "-" +
-                                          (newDay < 10 ? "0" : "") + to_string(newDay);
-
-                // Validate and format the new time
-                if (!validateTime(newHour, newMinute))
-                {
-                    cout << "Invalid time. Edit failed.\n";
-                    return;
-                }
-                string newFormattedTime = (newHour < 10 ? "0" : "") + to_string(newHour) + ":" +
-                                          (newMinute < 10 ? "0" : "") + to_string(newMinute);
-
-                // Update appointment details
-                appointment.appointmentDate = newFormattedDate;
-                appointment.appointmentTime = newFormattedTime;
-                appointment.description = newDescription;
-
-                cout << "Appointment updated successfully for Patient ID " << patientId << ".\n";
-                return;
-            }
-        }
-        cout << "Appointment not found for Patient ID " << patientId << ".\n";
-    }
-
-    // Function to delete an appointment by Patient ID
-    void deleteAppointment()
-    {
-        int patientId;
-
-        cout << "Enter Patient ID: ";
-        cin >> patientId;
-
-        for (auto it = appointments.begin(); it != appointments.end(); ++it)
-        {
-            if (it->patientId == patientId)
-            {
-                appointments.erase(it);
-                cout << "Appointment deleted successfully for Patient ID " << patientId << ".\n";
-                return;
-            }
-        }
-        cout << "Appointment not found for Patient ID " << patientId << ".\n";
-    }
-
-    // Save appointments to a file
+    // Function to save appointments to a binary file
     void saveToFile(const string &filename)
     {
-        ofstream file(filename);
+        ofstream file(filename, ios::binary);
         if (!file)
         {
             cout << "Error opening file for writing: " << filename << "\n";
             return;
         }
 
-        for (const auto &appointment : appointments)
-        {
-            file << appointment.patientId << ","
-                 << appointment.appointmentDate << ","
-                 << appointment.appointmentTime << ","
-                 << appointment.description << "\n";
-        }
+        size_t size = appointments.size();
+        file.write(reinterpret_cast<const char *>(&size), sizeof(size)); // Write the number of appointments
+        file.write(reinterpret_cast<const char *>(appointments.data()), size * sizeof(Appointment));
 
         file.close();
         cout << "Appointments saved to " << filename << " successfully.\n";
     }
 
-    // Load appointments from a file
+    // Function to load appointments from a binary file
     void loadFromFile(const string &filename)
     {
-        ifstream file(filename);
+        ifstream file(filename, ios::binary);
         if (!file)
         {
             cout << "Error opening file for reading: " << filename << "\n";
             return;
         }
 
-        appointments.clear(); // Clear existing appointments
+        size_t size;
+        file.read(reinterpret_cast<char *>(&size), sizeof(size)); // Read the number of appointments
 
-        string line;
-        while (getline(file, line))
-        {
-            size_t pos = 0;
-            string token;
-            int patientId;
-            string appointmentDate, appointmentTime, description;
-
-            // Extract data fields
-            pos = line.find(",");
-            patientId = stoi(line.substr(0, pos));
-            line.erase(0, pos + 1);
-
-            pos = line.find(",");
-            appointmentDate = line.substr(0, pos);
-            line.erase(0, pos + 1);
-
-            pos = line.find(",");
-            appointmentTime = line.substr(0, pos);
-            line.erase(0, pos + 1);
-
-            description = line;
-
-            // Add appointment to the vector
-            appointments.emplace_back(patientId, appointmentDate, appointmentTime, description);
-        }
+        appointments.resize(size);
+        file.read(reinterpret_cast<char *>(appointments.data()), size * sizeof(Appointment));
 
         file.close();
         cout << "Appointments loaded from " << filename << " successfully.\n";
