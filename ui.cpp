@@ -53,6 +53,7 @@ void patient_management()
             getline(cin, Mrecord);
             system("cls");
             pm.addPatient(id, name, age, tel, Mrecord);
+            cout << "\nPatient added successfully.\n";
             cout<<endl<<"Press ENTER to go back";
             break;
         }
