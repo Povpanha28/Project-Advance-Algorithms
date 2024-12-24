@@ -4,12 +4,14 @@
 #include "utils/Appointment.hpp"
 #include "utils/Patient_Manage.hpp"
 #include "utils/Generate.hpp"
+#include "utils/timingSlot.hpp"
 
 string PM_file="file/PatientInfo.dat";
 string APM_file="file/appointment.dat";
 
 PatientManagement pm;
 AppointmentManagement app_m(pm);
+Clinic clinic(pm);
 
 using namespace std;
 void initial(){
@@ -243,12 +245,54 @@ void app_management()
             }
     }
 }
-void clinic_time()
-{
-    cout << "\tClinic Time" << endl;
-    cout << "1. Set" << endl;
-    cout << "2. Views" << endl;
-    cout << "3.Back" << endl;
+
+void clinic_time_management() {
+    while (true) {
+        system("cls");
+        cout << "\tClinic Time Management" << endl;
+        cout << "1. View Clinic Hours" << endl;
+        cout << "2. Set Clinic Hours" << endl;
+        cout << "ESC to Back" << endl;
+
+        char option = getch();
+        switch (option) {
+            case '1': {
+                system("cls");
+                clinic.viewClinicHours();
+                cout << "\nPress ENTER to go back...";
+                cin.ignore();
+                cin.get();
+                break;
+            }
+            case '2': {
+                system("cls");
+                int startHour, endHour;
+                cout << "Set Clinic Hours" << endl;
+                cout << "Enter Start Hour (0-23): ";
+                cin >> startHour;
+                cout << "Enter End Hour (0-23): ";
+                cin >> endHour;
+
+                try {
+                    clinic.setClinicHours(startHour, endHour);
+                } catch (const invalid_argument &e) {
+                    cout << "Error: " << e.what() << endl;
+                }
+
+                cout << "\nPress ENTER to go back...";
+                cin.ignore();
+                cin.get();
+                break;
+            }
+            case 27: // ESC key
+                return;
+            default:
+                cout << "\nInvalid Input. Press ENTER to try again...";
+                cin.ignore();
+                cin.get();
+                break;
+        }
+    }
 }
 void generateReport(){
     system("cls");
@@ -287,7 +331,7 @@ int main(){
             app_management();
             break;
         case '3':
-            clinic_time();
+            clinic_time_management();
             break;
         case '4':
             generateReport();
