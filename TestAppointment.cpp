@@ -44,7 +44,7 @@ int main()
     appointmentManager.viewAppointments();
 
     // Save appointments to a binary file
-    string appointmentFilename = "appointments.dat";
+    string appointmentFilename = "file/appointments.dat";
     cout << "\nSaving appointments to binary file...\n";
     appointmentManager.saveToFile(appointmentFilename);
 
