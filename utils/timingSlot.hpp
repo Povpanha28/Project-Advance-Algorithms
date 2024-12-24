@@ -3,7 +3,15 @@
 
 #include <iostream>
 #include <vector>
+#include <chrono>
+#include <ctime>
+#include <thread>
+#include <iomanip>
+#include <sstream>
+#include <cstring> // Include for strptime
+#include "utils/Appointment.hpp"
 using namespace std;
+
 
 class TimeSlot {
 private:
@@ -39,10 +47,11 @@ public:
 class Clinic {
 private:
     TimeSlot clinicHours;  // Represents the clinic's operating hours
+    AppointmentManagement appointmentManagement; // Link to AppointmentManagement
 
 public:
     // Constructor initializes default clinic hours (8 AM to 5 PM)
-    Clinic() : clinicHours(8, 17) {}
+    Clinic(PatientManagement& patientManager) : clinicHours(8, 17), appointmentManagement(patientManager) {}
 
     // Method to set clinic hours
     void setClinicHours(int startHour, int endHour) {
@@ -57,6 +66,44 @@ public:
     // Method to view clinic hours
     void viewClinicHours() const {
         cout << "Clinic is open from " << clinicHours.getStartHour() << ":00 to " << clinicHours.getEndHour() << ":00 every day.\n";
+    }
+
+    void AppointmentReminder(int patientId) {
+        // Search for the appointment
+        for (const auto& appointment : appointmentManagement.appointments) {
+            if (appointment.patientId == patientId) {
+                struct tm tm = {};
+                string appointmentDateTime = appointment.appointmentDate + " " + appointment.appointmentTime + ":00";
+                istringstream ss(appointmentDateTime);
+                ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
+                if (ss.fail()) {
+                    cout << "Error parsing appointment date: " << appointmentDateTime << "\n";
+                    return;
+                }
+
+                time_t targetTime = mktime(&tm);
+                if (targetTime == -1) {
+                    cout << "Error converting appointment date to time.\n";
+                    return;
+                }
+
+                // Check if the appointment time is in the past
+                time_t now = time(nullptr);
+                if (targetTime <= now) {
+                    cout << "Appointment time has already passed.\n";
+                    return;
+                }
+
+                // Wait until the appointment time
+                cout << "Next Appointment set for " << asctime(&tm) << "...\n";
+                this_thread::sleep_until(chrono::system_clock::from_time_t(targetTime));
+
+                // Display the reminder message
+                cout << "Reminder: Don't forget your appointment with " << appointment.patientId << "!\n";
+                return;
+            }
+        }
+        cout << "Appointment not found for Patient ID " << patientId << ".\n";
     }
 };
 
