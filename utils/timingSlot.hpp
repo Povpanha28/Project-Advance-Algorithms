@@ -9,7 +9,7 @@
 #include <iomanip>
 #include <sstream>
 #include <cstring> // Include for strptime
-#include "utils/Appointment.hpp"
+#include "Appointment.hpp"
 using namespace std;
 
 
